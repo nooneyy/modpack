@@ -1,7 +1,8 @@
 const { app, BrowserWindow } = require('electron')
 const fs = require('fs')
-const https = require('https')
+const https = require('follow-redirects').https
 const RPC = require("discord-rpc")
+const { fileURLToPath } = require('url')
 const rpc = new RPC.Client({
     transport: "ipc"
 })
@@ -11,7 +12,7 @@ const options = {
   path: '/repos/nooneyy/mc-modpack',
   method: 'GET',
   headers: {'User-Agent': 'javascript'}
-} 
+}
 function createWindow () {
   const win = new BrowserWindow({
     width: 950,
@@ -29,8 +30,10 @@ function createWindow () {
   else {
     win.webContents.executeJavaScript('document.getElementById("unable").style.display="none"')
     win.webContents.executeJavaScript('document.getElementById("unsupported").style.display="none"')
+    var supportedplatform = true
   }
   if (fs.existsSync(process.env.APPDATA + "/.minecraft/versions/1.12.2")) {
+    var supportedminecraft = true
     win.webContents.executeJavaScript('document.getElementById("mcmissing").style.display="none"')
     win.webContents.executeJavaScript('document.getElementById("mcversion").style.display="none"')
   }
@@ -59,9 +62,11 @@ function createWindow () {
   githubrequest.end()
   if (fs.existsSync(process.env.APPDATA + "/.minecraft/versions/1.12.2-forge-14.23.5.2854")) {
     win.webContents.executeJavaScript('document.getElementById("forgemissing").style.display="none"')
+    supportedforge = true
   }
   else {
     win.webContents.executeJavaScript('document.getElementById("forgefound").style.display="none"')
+    supportedforge = false
   }
   
   var spawn = require('child_process').spawn('java', ['-version']);
@@ -77,6 +82,17 @@ function createWindow () {
           console.log("No java detected")
       }
   });
+
+
+
+if (supportedplatform == true && supportedminecraft == true && supportedforge == true) {
+  win.webContents.executeJavaScript('document.getElementById("install").className = "btn btn-success bottom-0 end-0 position-absolute me-1 mb-1"')
+  console.log("Installation unlocked")
+}  
+else if (supportedplatform == true && supportedminecraft == true && supportedforge == false) {
+  win.webContents.executeJavaScript('document.getElementById("install").className = "btn btn-success bottom-0 end-0 position-absolute me-1 mb-1"')
+  console.log("Installation unlocked without forge")
+}
 
   win.loadFile('index.html')
 }
@@ -105,3 +121,23 @@ rpc.on("ready", () => {
 })
 
 rpc.login({clientId: "801840006401884171"})
+
+
+
+/* const forge = fs.createWriteStream(process.env.TEMP + "/forge-1.12.2-14.23.5.2854-installer.jar")
+console.log("Downloading Forge...")
+const forgedownload = https.get("https://files.minecraftforge.net/maven/net/minecraftforge/forge/1.12.2-14.23.5.2854/forge-1.12.2-14.23.5.2854-installer.jar", response =>{
+  response.pipe(forge)
+  console.log("Download complete!")
+}) */
+
+/* const mods = fs.createWriteStream(process.env.TEMP + "/mods.zip")
+console.log("Downloading mods...")
+const modsdownload = https.get("https://codeload.github.com/nooneyy/mc-modpack/zip/main", response=>{
+  response.pipe(mods)
+  mods.on('finish', function(){
+    mods.close()
+  console.log("Download complete!")
+  })
+}) */
+
