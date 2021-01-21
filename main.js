@@ -1,9 +1,13 @@
 const { app, BrowserWindow } = require('electron')
 const fs = require('fs')
-const GitHub = require('octocat')
-const client = new GitHub
-client.get('/repos/nooneyy/mc-modpack')
-
+const https = require('https')
+const options = {
+  hostname: 'api.github.com',
+  port: 443,
+  path: '/repos/nooneyy/mc-modpack',
+  method: 'GET',
+  headers: {'User-Agent': 'javascript'}
+} 
 function createWindow () {
   const win = new BrowserWindow({
     width: 950,
@@ -27,6 +31,21 @@ function createWindow () {
   else {
     win.webContents.executeJavaScript('document.getElementById("mcfound").style.display="none"')
   }
+  githubrequest = https.request(options, response => {
+    if(response.statusCode == 200) {
+      console.log("GitHub code is 200. Good to go!")
+      win.webContents.executeJavaScript('document.getElementById("gitmissing").style.display="none"')
+    }
+    else if(response.statusCode == 404) {
+      console.log("GitHub code is 404. Is the repo present?")
+      win.webContents.executeJavaScript('document.getElementById("gitfound").style.display="none"')
+    }
+    else {
+      console.log("Github code is unknown. Is internet down?")
+      win.webContents.executeJavaScript('document.getElementById("gitfound").style.display="none"')
+    }
+  })
+  githubrequest.end()
 
   win.loadFile('index.html')
 }
