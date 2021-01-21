@@ -22,8 +22,7 @@
   },
   "dependencies": {
     "discord-rpc": "^3.1.4",
-    "electron-squirrel-startup": "^1.0.0",
-    "follow-redirects": "^1.13.1"
+    "electron-squirrel-startup": "^1.0.0"
   },
   "config": {
     "forge": {
