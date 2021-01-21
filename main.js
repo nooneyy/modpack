@@ -46,6 +46,12 @@ function createWindow () {
     }
   })
   githubrequest.end()
+  if (fs.existsSync(process.env.APPDATA + "/.minecraft/versions/1.12.2-forge-14.23.5.2854")) {
+    win.webContents.executeJavaScript('document.getElementById("forgemissing").style.display="none"')
+  }
+  else {
+    win.webContents.executeJavaScript('document.getElementById("forgefound").style.display="none"')
+  }
 
   win.loadFile('index.html')
 }
