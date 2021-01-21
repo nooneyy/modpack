@@ -1,6 +1,10 @@
 const { app, BrowserWindow } = require('electron')
 const fs = require('fs')
 const https = require('https')
+const RPC = require("discord-rpc")
+const rpc = new RPC.Client({
+    transport: "ipc"
+})
 const options = {
   hostname: 'api.github.com',
   port: 443,
@@ -17,6 +21,7 @@ function createWindow () {
       nodeIntegration: true
     }
   })
+  win.removeMenu()
   if (process.platform !== "win32") {
     console.log("Unsupported platform detected... Defining variable supported equal to false.")
     win.webContents.executeJavaScript('document.getElementById("supported").style.display="none"')
@@ -25,11 +30,17 @@ function createWindow () {
     win.webContents.executeJavaScript('document.getElementById("unable").style.display="none"')
     win.webContents.executeJavaScript('document.getElementById("unsupported").style.display="none"')
   }
-  if (fs.existsSync(process.env.APPDATA + "/.minecraft/")) {
+  if (fs.existsSync(process.env.APPDATA + "/.minecraft/versions/1.12.2")) {
+    win.webContents.executeJavaScript('document.getElementById("mcmissing").style.display="none"')
+    win.webContents.executeJavaScript('document.getElementById("mcversion").style.display="none"')
+  }
+  else if (fs.existsSync(process.env.APPDATA + "/.minecraft/")) {
+    win.webContents.executeJavaScript('document.getElementById("mcfound").style.display="none"')
     win.webContents.executeJavaScript('document.getElementById("mcmissing").style.display="none"')
   }
   else {
     win.webContents.executeJavaScript('document.getElementById("mcfound").style.display="none"')
+    win.webContents.executeJavaScript('document.getElementById("mcversion").style.display="none"')
   }
   githubrequest = https.request(options, response => {
     if(response.statusCode == 200) {
@@ -52,6 +63,20 @@ function createWindow () {
   else {
     win.webContents.executeJavaScript('document.getElementById("forgefound").style.display="none"')
   }
+  
+  var spawn = require('child_process').spawn('java', ['-version']);
+  spawn.on('error', function(err){
+  })
+  spawn.stderr.on('data', function(data) {
+      data = data.toString().split('\n')[0];
+      javaVersion = new RegExp('java version').test(data) ? data.split(' ')[2].replace(/"/g, '') : false;
+      if (javaVersion != false) {
+        win.webContents.executeJavaScript('document.getElementById("javamissing").style.display="none"')
+      } else {
+        win.webContents.executeJavaScript('document.getElementById("javafound").style.display="none"')
+          console.log("No java detected")
+      }
+  });
 
   win.loadFile('index.html')
 }
@@ -68,3 +93,15 @@ app.on('activate', () => {
     createWindow()
   }
 })
+
+rpc.on("ready", () => {
+  rpc.setActivity({
+    details: "minecraft 1.12",
+    state: "installing/updating",
+    startTimestamp: new Date(),
+    largeImageKey: "logo",
+    largeImageText: "modpack installer - by nooney"
+  })
+})
+
+rpc.login({clientId: "801840006401884171"})
