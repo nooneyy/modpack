@@ -1,5 +1,5 @@
 {
-  "name": "modpack",
+  "name": "modpack-installer",
   "version": "0.1.0",
   "description": "modpackenzie pro boysenzies",
   "main": "main.js",
@@ -10,7 +10,7 @@
     "make": "electron-forge make"
   },
   "keywords": [],
-  "author": "noonenzie",
+  "author": "nooney",
   "license": "ISC",
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.54",

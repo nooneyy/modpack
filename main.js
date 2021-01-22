@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require('electron')
+if (require('electron-squirrel-startup')) return app.quit();
 const fs = require('fs')
 const RPC = require("discord-rpc")
 const rpc = new RPC.Client({
