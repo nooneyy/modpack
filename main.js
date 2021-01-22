@@ -1,4 +1,5 @@
 const { app, BrowserWindow } = require('electron')
+const fs = require('fs')
 const RPC = require("discord-rpc")
 const rpc = new RPC.Client({
     transport: "ipc"
@@ -15,13 +16,22 @@ function createWindow () {
     }
   })
   win.loadFile('index.html')
-  win.removeMenu()
+  // win.removeMenu()
 }
 
 app.whenReady().then(createWindow)
 
 app.on('window-all-closed', () => {
-    app.quit()
+  if(fs.existsSync(process.env.TEMP + "/forge.jar")) {  
+      fs.unlinkSync(process.env.TEMP + "/forge.jar")
+  }
+  if(fs.existsSync(process.env.TEMP + "/mods.zip")) {  
+    fs.unlinkSync(process.env.TEMP + "/mods.zip")
+  }
+  if(fs.existsSync(process.env.TEMP + "/mc-modpack-main")) {  
+    fs.rmdirSync(process.env.TEMP + "/mc-modpack-main", {recursive: true})
+  }
+      app.quit()
   }
 )
 
